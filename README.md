@@ -1,5 +1,5 @@
 # java-assessment
-This project was created as part of the process to a Java developer position. Project was build using Spring Boot for new services and consuming existing data from /users and /teams endpoints provided.
+This project was created as part of recruiting process to Java developer position. Project was built using Spring Boot for new services and consuming existing data from /users and /teams existing endpoints that were provided.
 
 ## Items on assessment description
 #### Create a new role:
