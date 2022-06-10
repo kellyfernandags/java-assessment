@@ -1,41 +1,23 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.model.Role;
+import com.exercise.assessment.model.User;
+
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+public interface UserService {
+    Optional<User> findByIdOnApi(String id);
 
-import com.exercise.assessment.model.User;
-import com.exercise.assessment.repository.UserRepository;
+    User saveOnRepository(User user);
 
-@Service
-public class UserService {
-	
-	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	public UserService() {
-	}
+    Optional<User> findUserWithRoleById(String userId);
 
-	public Optional<User> findByIdOnApi(String id) {
-		Optional<User> userOptional = Optional.empty();
-		String uri = "https://cgjresszgg.execute-api.eu-west-1.amazonaws.com/users/" + id;
+    List<User> findAll();
 
-		RestTemplate restTemplate = new RestTemplate();
-		User user = restTemplate.getForEntity(uri, User.class).getBody();
-		if (user != null)
-			userOptional = Optional.of(user);
-		
-		return userOptional;
-	}
+    List<User> findByRole(Role role);
 
-	public User saveAndFlushOnRepository(User user) {
-		return this.userRepository.saveAndFlush(user);
-	}
+    Optional<User> findById(String id);
 
-	public Optional<User> findUserWithRoleById(String userId) {
-		return userRepository.findById(userId);
-	}
+    void deleteById(String id);
 }

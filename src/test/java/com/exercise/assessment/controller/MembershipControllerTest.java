@@ -1,9 +1,16 @@
 package com.exercise.assessment.controller;
 
-import java.net.URI;
-
+import com.exercise.assessment.form.MembershipForm;
+import com.exercise.assessment.form.RoleAssignmentForm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +20,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.exercise.assessment.form.RoleAssignmentForm;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class MembershipControllerTest {
+@TestInstance(Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class MembershipControllerTest {
 	
 	@Autowired 
 	private MockMvc mockMvc;
@@ -26,19 +34,21 @@ public class MembershipControllerTest {
 	@Autowired
 	private RoleAssignmentController assignment;
 	
+	private final static String BASE_URI = ("/membership");
+	private final static RoleAssignmentForm FORM = new RoleAssignmentForm("fd282131-d8aa-4819-b0c8-d9e0bfb1b75c",1L);
+
+	@BeforeAll
+	void setUp() throws Exception {
+		assignment.addNewRoleAssignment(FORM);
+	}
+
 	@Test
-	public void shouldSaveNewMembershipStatusCode201() throws Exception {
-		
-		String requestBodyAssignment = "{\"userId\":\"fd282131-d8aa-4819-b0c8-d9e0bfb1b75c\",\"roleId\":1}";
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		RoleAssignmentForm form = objectMapper.readValue(requestBodyAssignment, RoleAssignmentForm.class);
-		assignment.addNewRoleAssignment(form);
-		
-		URI uri = new URI ("/memberships");
-		String requestBody = "{\"userId\":\"fd282131-d8aa-4819-b0c8-d9e0bfb1b75c\""
-							+ ",\"teamId\":\"7676a4bf-adfe-415c-941b-1739af07039b\"}";
-		
+	@Order(1)
+	void shouldSaveNewMembershipStatusCode201() throws Exception {
+		URI uri = new URI (BASE_URI);
+		MembershipForm form = new MembershipForm("7676a4bf-adfe-415c-941b-1739af07039b", FORM.getUserId());
+		String requestBody = new ObjectMapper().writeValueAsString(form);
+
 		mockMvc
 			.perform(MockMvcRequestBuilders
 					.post(uri)
@@ -50,24 +60,12 @@ public class MembershipControllerTest {
 	}
 	
 	@Test
-	public void shouldNotSaveNewMembershipAlreadyExistsStatusCode406() throws Exception  {
-		
-		String requestBodyAssignment = "{\"userId\":\"b03fb9bb-5dc1-4783-9258-65c0d14a113d\",\"roleId\":2}";
-		
-		ObjectMapper objectMapper = new ObjectMapper();
-		RoleAssignmentForm form = objectMapper.readValue(requestBodyAssignment, RoleAssignmentForm.class);
-		assignment.addNewRoleAssignment(form);
-		
-		URI uri = new URI ("/memberships");
-		String requestBody = "{\"userId\":\"b03fb9bb-5dc1-4783-9258-65c0d14a113d\""
-							+ ",\"teamId\":\"778f3814-57b9-44d1-996f-eb5630322983\"}";
-		
-		mockMvc
-			.perform(MockMvcRequestBuilders
-					.post(uri)
-					.content(requestBody)
-					.contentType(MediaType.APPLICATION_JSON));
-		
+	@Order(2)
+	void shouldNotSaveNewMembershipAlreadyExistsStatusCode400() throws Exception  {
+		URI uri = new URI (BASE_URI);
+		MembershipForm form = new MembershipForm("7676a4bf-adfe-415c-941b-1739af07039b", FORM.getUserId());
+		String requestBody = new ObjectMapper().writeValueAsString(form);
+
 		mockMvc
 		.perform(MockMvcRequestBuilders
 				.post(uri)
@@ -75,14 +73,16 @@ public class MembershipControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 		.andExpect(MockMvcResultMatchers
 				.status()
-				.is(HttpStatus.NOT_ACCEPTABLE.value()));
+				.is(HttpStatus.BAD_REQUEST.value()));
 	}
 	
 	@Test
-	public void shouldNotSaveNewMembershipStatusCode400_InvalidUser() throws Exception {
-		URI uri = new URI ("/memberships");
-		String requestBody = "{\"userId\":\"XXXXXXXXXXXXX\",\"teamId\":\"7676a4bf-adfe-415c-941b-1739af07039b\"}";
-		
+	@Order(3)
+	void shouldNotSaveNewMembershipStatusCode400_InvalidUser() throws Exception {
+		URI uri = new URI (BASE_URI);
+		MembershipForm form = new MembershipForm("7676a4bf-adfe-415c-941b-1739af07039b", "XXXXXXXXXXXXX");
+		String requestBody = new ObjectMapper().writeValueAsString(form);
+
 		mockMvc
 			.perform(MockMvcRequestBuilders
 					.post(uri)
@@ -97,10 +97,12 @@ public class MembershipControllerTest {
 	}
 	
 	@Test
-	public void shouldNotSaveNewMembershipStatusCode400_InvalidTeamId() throws Exception {
-		URI uri = new URI ("/memberships");
-		String requestBody = "{\"userId\":\"fd282131-d8aa-4819-b0c8-d9e0bfb1b75c\",\"teamId\":\"XXXXXXXXXXXXX\"}";
-		
+	@Order(4)
+	void shouldNotSaveNewMembershipStatusCode400_InvalidTeamId() throws Exception {
+		URI uri = new URI (BASE_URI);
+		MembershipForm form = new MembershipForm("XXXXXXXXXXXXX", FORM.getUserId());
+		String requestBody = new ObjectMapper().writeValueAsString(form);
+
 		mockMvc
 			.perform(MockMvcRequestBuilders
 					.post(uri)
@@ -115,8 +117,9 @@ public class MembershipControllerTest {
 	}
 	
 	@Test
-	public void shouldGetAllMembershipStatusCode200() throws Exception {
-		URI uri = new URI ("/memberships");
+	@Order(5)
+	void shouldGetAllMembershipStatusCode200() throws Exception {
+		URI uri = new URI (BASE_URI);
 	
 		mockMvc
 			.perform(MockMvcRequestBuilders
@@ -127,21 +130,23 @@ public class MembershipControllerTest {
 	}
 	
 	@Test
-	public void shouldGetMembershipByRoleStatusCode200() throws Exception {
-		URI uri = new URI ("/memberships");
+	@Order(6)
+	void shouldGetMembershipByRoleStatusCode200() throws Exception {
+		URI uri = new URI (BASE_URI);
 	
 		mockMvc
 			.perform(MockMvcRequestBuilders
 					.get(uri)
-					.param("roleId", "1"))
+					.param("roleId", String.valueOf(FORM.getRoleId())))
 			.andExpect(MockMvcResultMatchers
 					.status()
 					.is(HttpStatus.OK.value()));
 	}
 	
 	@Test
-	public void shouldNotGetMembershipByRoleStatusCode400_invalidCharAsRoleId() throws Exception {
-		URI uri = new URI ("/memberships");
+	@Order(7)
+	void shouldNotGetMembershipByRoleStatusCode400_invalidCharAsRoleId() throws Exception {
+		URI uri = new URI (BASE_URI);
 	
 		mockMvc
 			.perform(MockMvcRequestBuilders
@@ -154,10 +159,11 @@ public class MembershipControllerTest {
 					.content()
 					.string(Matchers.containsString("'roleId' should be a valid number")));
 	}
-	
+
+	@Order(8)
 	@Test
-	public void shouldNotGetMembershipByRoleStatusCode400_invalidRoleId() throws Exception {
-		URI uri = new URI ("/memberships");
+	void shouldNotGetMembershipByRoleStatusCode400_invalidRoleId() throws Exception {
+		URI uri = new URI (BASE_URI);
 	
 		mockMvc
 			.perform(MockMvcRequestBuilders
@@ -169,5 +175,57 @@ public class MembershipControllerTest {
 			.andExpect(MockMvcResultMatchers
 					.content()
 					.string(Matchers.containsString("id is not related to a valid role")));
+	}
+
+	@Test
+	@Order(9)
+	void shouldGetMembershipByMembershipIdStatusCode200() throws Exception {
+		URI uri = new URI (BASE_URI + "/1");
+
+		mockMvc
+				.perform(MockMvcRequestBuilders
+						.get(uri))
+				.andExpect(MockMvcResultMatchers
+						.status()
+						.is(HttpStatus.OK.value()));
+	}
+
+	@Test
+	@Order(10)
+	void shouldNotGetMembershipByMembershipIdStatusCode404() throws Exception {
+		URI uri = new URI (BASE_URI + "/55555555");
+
+		mockMvc
+				.perform(MockMvcRequestBuilders
+						.get(uri))
+				.andExpect(MockMvcResultMatchers
+						.status()
+						.is(HttpStatus.NOT_FOUND.value()));
+	}
+
+	@Test
+	@Order(11)
+	void shouldDeleteMembershipByMembershipIdStatusCode200() throws Exception {
+		URI uri = new URI (BASE_URI + "/2");
+
+		mockMvc
+				.perform(MockMvcRequestBuilders
+						.delete(uri))
+				.andExpect(MockMvcResultMatchers
+						.status()
+						.is(HttpStatus.OK.value()));
+	}
+
+	@Test
+	@Order(12)
+	void shouldNotDeleteMembershipByMembershipIdStatusCode404() throws Exception {
+		URI uri = new URI (BASE_URI + "/55555555");
+
+		mockMvc
+				.perform(MockMvcRequestBuilders
+						.delete(uri))
+				.andExpect(MockMvcResultMatchers
+						.status()
+						.is(HttpStatus.NOT_FOUND.value()));
 	}
 }

@@ -1,5 +1,13 @@
 package com.exercise.assessment.model;
 
+import com.exercise.assessment.dto.MembershipDTO;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.modelmapper.ModelMapper;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,48 +15,25 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
+@Getter
+@Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class Membership {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@ManyToOne
-	private User user;
-	@ManyToOne
-	private Team team;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public Membership() {
-	}
+    @ManyToOne
+    @NonNull
+    private User user;
 
-	public Membership(User user, Team team) {
-		this.user = user;
-		this.team = team;
-	}
-	
-	public Long getId() {
-		return id;
-	}
+    @ManyToOne
+    @NonNull
+    private Team team;
 
-	public User getUser() {
-		return user;
-	}
-
-	public Team getTeam() {
-		return team;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public void setTeam(Team team) {
-		this.team = team;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("Membership [user=%s, team=%s]", user, team);
-	}
-
+    public MembershipDTO convertEntityToDTO() {
+        return new ModelMapper().map(this, MembershipDTO.class);
+    }
 }

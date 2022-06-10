@@ -1,20 +1,18 @@
 package com.exercise.assessment.form;
 
-import javax.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import javax.validation.constraints.NotNull;
 
+@Getter
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class RoleAssignmentForm {
-
-	@NotNull @NotEmpty
+	@NotNull @NonNull
 	private String userId;
-	@NotNull
+
 	private Long roleId;
-	
-	
-	public String getUserId() {
-		return userId;
-	}
-	public Long getRoleId() {
-		return roleId;
-	}
 }
