@@ -1,5 +1,6 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 import com.exercise.assessment.model.User;
 import com.exercise.assessment.repository.UserRepository;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @ContextConfiguration(classes={UserRepository.class})
@@ -36,15 +38,15 @@ class UserServiceTest {
 	}
 
 	@Test
-	void shouldGetValidUserOnApiById() {
-		Optional<User> user = this.userService.findByIdOnApi("fd282131-d8aa-4819-b0c8-d9e0bfb1b75c");
-		Assertions.assertTrue(user.isPresent());
+	void shouldGetValidUserOnApiById() throws NotFoundException {
+		User user = this.userService.findByIdOnApi("fd282131-d8aa-4819-b0c8-d9e0bfb1b75c");
+		Assertions.assertNotNull(user);
 	}
 
 	@Test
 	void shouldNotGetValidUserOnApiById() {
-		Optional<User> user = this.userService.findByIdOnApi("XXXXXXXXXXXXX");
-		Assertions.assertFalse(user.isPresent());
+		Exception exception = assertThrows(NotFoundException.class, () -> this.userService.findByIdOnApi("XXXXXXXXXXXXX"));
+		assertNotNull(exception);
 	}
 
 	@Test
@@ -56,11 +58,11 @@ class UserServiceTest {
 	}
 
 	@Test
-	void shouldReturnUserOnFindById() {
+	void shouldReturnUserOnFindById() throws NotFoundException {
 		Mockito.when(this.userRepository.findById(Mockito.any(String.class)))
 				.thenReturn(this.getMockOptionalUser());
-		Optional<User> response = this.userService.findById("test");
-		Assertions.assertTrue(response.isPresent());
+		User response = this.userService.findUserWithRoleById("test");
+		Assertions.assertNotNull(response);
 	}
 
 	@Test

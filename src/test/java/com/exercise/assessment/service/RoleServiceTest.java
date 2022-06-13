@@ -1,5 +1,6 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 import com.exercise.assessment.repository.RoleRepository;
 import com.exercise.assessment.service.impl.RoleServiceImpl;
@@ -35,11 +36,11 @@ class RoleServiceTest {
     }
 
     @Test
-    void shouldReturnMembershipOnFindById() {
+    void shouldReturnMembershipOnFindById() throws NotFoundException {
         Mockito.when(this.roleRepository.findById(Mockito.any(Long.class)))
                 .thenReturn(this.getMockOptionalRole());
-        Optional<Role> response = this.roleService.findById(1L);
-        Assertions.assertTrue(response.isPresent());
+        Role response = this.roleService.findById(1L);
+        Assertions.assertNotNull(response);
     }
 
     @Test
@@ -51,7 +52,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void save() {
+    void shouldSaveNewRole() {
         Mockito.when(this.roleRepository.save(Mockito.any(Role.class)))
                 .thenReturn(this.getMockRole());
         Role response = this.roleService.save(new Role());
@@ -59,7 +60,7 @@ class RoleServiceTest {
     }
 
     @Test
-    void deleteById() {
+    void shouldDeleteRoleById() {
         this.roleService.deleteById(1L);
         Mockito.verify(this.roleRepository, Mockito.times(1)).deleteById(1L);
     }

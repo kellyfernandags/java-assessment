@@ -1,5 +1,6 @@
 package com.exercise.assessment.service.impl;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 import com.exercise.assessment.repository.RoleRepository;
 import com.exercise.assessment.service.RoleService;
@@ -21,11 +22,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Optional<Role> findById(Long roleId) {
+    public Role findById(Long roleId) throws NotFoundException {
         if (roleId == null)
-            return this.roleRepository.findByName(DEFAULT_ROLE_NAME);
+            return this.roleRepository.findByName(DEFAULT_ROLE_NAME).orElseThrow (() ->
+                    new NotFoundException("'" +roleId+ "' role default id is not found"));
         else
-            return this.roleRepository.findById(roleId);
+            return this.roleRepository.findById(roleId).orElseThrow (() ->
+                    new NotFoundException("'" +roleId+ "' role id is not found"));
     }
 
     @Override

@@ -51,14 +51,9 @@ public class RoleController {
     @ApiOperation(value = "Route to get role by role id")
     public ResponseEntity<ResponseWrapper<RoleDTO>> getRoleById(@PathVariable Long id) throws NotFoundException {
         ResponseWrapper<RoleDTO> response = new ResponseWrapper<>();
-        Optional<Role> role = this.roleService.findById(id);
-        if (role.isPresent()) {
-            response.setData(role.get().convertEntityToDTO());
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            String errors = String.format("'%s' not found", id);
-            throw new NotFoundException(errors);
-        }
+        Role role = this.roleService.findById(id);
+        response.setData(role.convertEntityToDTO());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping
@@ -81,16 +76,11 @@ public class RoleController {
     @ApiOperation(value = "Route to update an existing role")
     public ResponseEntity<ResponseWrapper<RoleDTO>> updateRole(@PathVariable Long id, @RequestBody @Valid RoleForm form) throws NotFoundException {
         ResponseWrapper<RoleDTO> response = new ResponseWrapper<>();
-
-        Optional<Role> optionalRole = this.roleService.findById(id);
-        if (!optionalRole.isPresent()) {
-            String errors = String.format("'%s' not found", id);
-            throw new NotFoundException(errors);
-        }
+        Role existingRole = this.roleService.findById(id);
         Role role = form.convert();
-        role.setId(id);
-        Role savedRole = this.roleService.save(role);
-        response.setData(savedRole.convertEntityToDTO());
+        role.setId(existingRole.getId());
+        Role updatedRole = this.roleService.save(role);
+        response.setData(updatedRole.convertEntityToDTO());
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
@@ -98,15 +88,10 @@ public class RoleController {
     @ApiOperation(value = "Route to delete an existing role using role id")
     public ResponseEntity<ResponseWrapper<String>> deleteRoleById(@PathVariable Long id) throws NotFoundException {
         ResponseWrapper<String> response = new ResponseWrapper<>();
-        Optional<Role> role = this.roleService.findById(id);
-        if (role.isPresent()) {
-            this.roleService.deleteById(id);
-            String dataMsg = String.format("'%s' successfully deleted", id);
-            response.setData(dataMsg);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            String errors = String.format("'%s' not found", id);
-            throw new NotFoundException(errors);
-        }
+        Role role = this.roleService.findById(id);
+        this.roleService.deleteById(role.getId());
+        String dataMsg = String.format("'%s' successfully deleted", id);
+        response.setData(dataMsg);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

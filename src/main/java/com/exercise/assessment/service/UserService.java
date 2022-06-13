@@ -1,23 +1,21 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 import com.exercise.assessment.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
-    Optional<User> findByIdOnApi(String id);
+    User findByIdOnApi(String id) throws NotFoundException;
 
     User saveOnRepository(User user);
 
-    Optional<User> findUserWithRoleById(String userId);
+    User findUserWithRoleById(String userId) throws NotFoundException;
 
     List<User> findAll();
 
     List<User> findByRole(Role role);
-
-    Optional<User> findById(String id);
 
     void deleteById(String id);
 }

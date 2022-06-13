@@ -1,12 +1,13 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RoleService {
-    Optional<Role> findById(Long roleId);
+    Role findById(Long roleId) throws NotFoundException;
 
     List<Role> findAll();
 

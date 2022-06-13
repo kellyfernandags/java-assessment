@@ -93,7 +93,7 @@ class MembershipControllerTest {
 					.is(HttpStatus.NOT_FOUND.value()))
 			.andExpect(MockMvcResultMatchers
 					.content()
-					.string(Matchers.containsString("is an invalid user or is not assigned to a role yet")));
+					.string(Matchers.containsString("user id is not found or doesn't have a role associated")));
 	}
 	
 	@Test
@@ -113,7 +113,7 @@ class MembershipControllerTest {
 					.is(HttpStatus.NOT_FOUND.value()))
 			.andExpect(MockMvcResultMatchers
 					.content()
-					.string(Matchers.containsString("is an invalid team")));
+					.string(Matchers.containsString("team id is not found")));
 	}
 	
 	@Test
@@ -174,7 +174,7 @@ class MembershipControllerTest {
 					.is(HttpStatus.NOT_FOUND.value()))
 			.andExpect(MockMvcResultMatchers
 					.content()
-					.string(Matchers.containsString("id is not related to a valid role")));
+					.string(Matchers.containsString("id is not found")));
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.form.MembershipForm;
 import com.exercise.assessment.model.Membership;
 import com.exercise.assessment.model.Role;
@@ -71,11 +72,11 @@ class MembershipServiceTest {
     }
 
     @Test
-    void shouldReturnMembershipOnFindById() {
+    void shouldReturnMembershipOnFindById() throws NotFoundException {
         Mockito.when(this.membershipRepository.findById(Mockito.any(Long.class)))
                 .thenReturn(this.getMockOptionalMembership());
-        Optional<Membership> response = this.membershipService.findById(1L);
-        Assertions.assertTrue(response.isPresent());
+        Membership response = this.membershipService.findById(1L);
+        Assertions.assertNotNull(response);
     }
 
     @Test

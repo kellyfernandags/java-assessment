@@ -63,21 +63,9 @@ public class MembershipController {
             throw new BadRequestException(errors);
         }
         // get record from local database, so they are already assigned to role
-        Optional<User> userOpt = this.userService.findUserWithRoleById(form.getUserId());
+        User user = this.userService.findUserWithRoleById(form.getUserId());
         // get team from external API/domain
-        Optional<Team> teamOpt = this.teamService.findByIdOnApi(form.getTeamId());
-
-        if (!userOpt.isPresent()) {
-            String errors = String.format("'%s' is an invalid user or is not assigned to a role yet", form.getUserId());
-            throw new NotFoundException(errors);
-        }
-        if (!teamOpt.isPresent()) {
-            String errors = String.format("'%s' is an invalid team", form.getTeamId());
-            throw new NotFoundException(errors);
-        }
-
-        User user = userOpt.get();
-        Team team = teamOpt.get();
+        Team team = this.teamService.findByIdOnApi(form.getTeamId());
 
         // save record from existing API locally
         this.teamService.saveOnRepository(team);
@@ -102,18 +90,13 @@ public class MembershipController {
             memberships = this.membershipService.findAll();
         } else {
             try {
-                longRoleId = Long.valueOf(roleId);
+                longRoleId = Long.parseLong(roleId);
             } catch (NumberFormatException e) {
                 String errors = String.format("'%s' is an invalid 'roleId'. 'roleId' should be a valid number", roleId);
                 throw new NotFoundException(errors);
             }
-
-            Optional<Role> roleOpt = this.roleService.findById(longRoleId);
-            if (!roleOpt.isPresent()) {
-                String errors = String.format("'%s' id is not related to a valid role", roleId);
-                throw new NotFoundException(errors);
-            }
-            memberships = this.membershipService.findByRole(roleOpt.get());
+            Role role = this.roleService.findById(longRoleId);
+            memberships = this.membershipService.findByRole(role);
         }
         memberships.forEach(t -> membershipsDTO.add(t.convertEntityToDTO()));
         response.setData(membershipsDTO);
@@ -124,29 +107,20 @@ public class MembershipController {
     @ApiOperation(value = "Route to get membership by id")
     public ResponseEntity<ResponseWrapper<MembershipDTO>> getMembershipById(@PathVariable Long id) throws NotFoundException {
         ResponseWrapper<MembershipDTO> response = new ResponseWrapper<>();
-        Optional<Membership> membership = this.membershipService.findById(id);
-        if (membership.isPresent()) {
-            response.setData(membership.get().convertEntityToDTO());
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            String errors = String.format("'%s' not found", id);
-            throw new NotFoundException(errors);
-        }
+        Membership membership = this.membershipService.findById(id);
+        response.setData(membership.convertEntityToDTO());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 
     @DeleteMapping("/{id}")
     @ApiOperation(value = "Route to delete an existing membership using membership id")
     public ResponseEntity<ResponseWrapper<String>> deleteMembershipById(@PathVariable Long id) throws NotFoundException {
         ResponseWrapper<String> response = new ResponseWrapper<>();
-        Optional<Membership> membership = this.membershipService.findById(id);
-        if (membership.isPresent()) {
-            this.membershipService.deleteById(id);
-            String dataMsg = String.format("'%s' successfully deleted", id);
-            response.setData(dataMsg);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            String errors = String.format("'%s' not found", id);
-            throw new NotFoundException(errors);
-        }
+        Membership membership = this.membershipService.findById(id);
+        this.membershipService.deleteById(membership.getId());
+        String dataMsg = String.format("'%s' successfully deleted", id);
+        response.setData(dataMsg);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

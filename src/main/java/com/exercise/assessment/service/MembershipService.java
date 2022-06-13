@@ -1,5 +1,6 @@
 package com.exercise.assessment.service;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.form.MembershipForm;
 import com.exercise.assessment.model.Membership;
 import com.exercise.assessment.model.Role;
@@ -17,7 +18,7 @@ public interface MembershipService {
 
     List<Membership> findByRole(Role role);
 
-    Optional<Membership> findById(Long id);
+    Membership findById(Long id) throws NotFoundException;
 
     void deleteById(Long id);
 }

@@ -1,5 +1,6 @@
 package com.exercise.assessment.service.impl;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.form.MembershipForm;
 import com.exercise.assessment.model.Membership;
 import com.exercise.assessment.model.Role;
@@ -42,8 +43,9 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     @Override
-    public Optional<Membership> findById(Long id) {
-        return this.membershipRepository.findById(id);
+    public Membership findById(Long id) throws NotFoundException {
+        return this.membershipRepository.findById(id).orElseThrow (() ->
+                new NotFoundException("'" + id + "' membership id is not found"));
     }
 
     @Override

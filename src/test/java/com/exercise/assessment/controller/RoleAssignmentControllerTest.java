@@ -146,7 +146,7 @@ class RoleAssignmentControllerTest {
 
 	@Test
 	@Order(8)
-	void shouldNotGetUserRoleByRoleStatusCode400_invalidRoleId() throws Exception {
+	void shouldNotGetUserRoleByRoleStatusCode404_invalidRoleId() throws Exception {
 		URI uri = new URI (BASE_URI);
 
 		mockMvc
@@ -158,7 +158,7 @@ class RoleAssignmentControllerTest {
 						.is(HttpStatus.NOT_FOUND.value()))
 				.andExpect(MockMvcResultMatchers
 						.content()
-						.string(Matchers.containsString("id is not related to a valid role")));
+						.string(Matchers.containsString("is not found")));
 	}
 
 
@@ -188,7 +188,7 @@ class RoleAssignmentControllerTest {
 						.is(HttpStatus.NOT_FOUND.value()))
 				.andExpect(MockMvcResultMatchers
 						.content()
-						.string(Matchers.containsString("not found or not assigned to any role")));
+						.string(Matchers.containsString("user id is not found or doesn't have a role associated")));
 	}
 
 	@Test

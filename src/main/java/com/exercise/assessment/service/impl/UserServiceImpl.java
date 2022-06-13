@@ -1,5 +1,6 @@
 package com.exercise.assessment.service.impl;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Role;
 import com.exercise.assessment.model.User;
 import com.exercise.assessment.repository.UserRepository;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,16 +23,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByIdOnApi(String id) {
-        Optional<User> userOptional = Optional.empty();
+    public User findByIdOnApi(String id) throws NotFoundException {
         String uri = BASE_URI + id;
 
         RestTemplate restTemplate = new RestTemplate();
         User user = restTemplate.getForEntity(uri, User.class).getBody();
         if (user != null)
-            userOptional = Optional.of(user);
-
-        return userOptional;
+            return user;
+        else throw new NotFoundException("'" + id + "' user id is not found");
     }
 
     @Override
@@ -41,8 +39,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserWithRoleById(String userId) {
-        return this.findById(userId);
+    public User findUserWithRoleById(String userId) throws NotFoundException {
+        return this.userRepository.findById(userId).orElseThrow (() ->
+                new NotFoundException("'" + userId + "' user id is not found or doesn't have a role associated"));
     }
 
     @Override
@@ -53,11 +52,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findByRole(Role role) {
         return this.userRepository.findByRole(role);
-    }
-
-    @Override
-    public Optional<User> findById(String id) {
-        return this.userRepository.findById(id);
     }
 
     @Override

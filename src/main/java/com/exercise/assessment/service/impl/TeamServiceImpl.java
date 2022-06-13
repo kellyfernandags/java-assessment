@@ -1,13 +1,12 @@
 package com.exercise.assessment.service.impl;
 
+import com.exercise.assessment.exception.NotFoundException;
 import com.exercise.assessment.model.Team;
 import com.exercise.assessment.repository.TeamRepository;
 import com.exercise.assessment.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.Optional;
 
 @Service
 public class TeamServiceImpl implements TeamService {
@@ -21,16 +20,15 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Optional<Team> findByIdOnApi(String id) {
-        Optional<Team> teamOptional = Optional.empty();
+    public Team findByIdOnApi(String id) throws NotFoundException {
         String uri = BASE_URI + id;
 
         RestTemplate restTemplate = new RestTemplate();
         Team team = restTemplate.getForEntity(uri, Team.class).getBody();
         if (team != null)
-            teamOptional = Optional.of(team);
+            return team;
+        else throw new NotFoundException("'" + id + "' team id is not found");
 
-        return teamOptional;
     }
 
     @Override
